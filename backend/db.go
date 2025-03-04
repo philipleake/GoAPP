@@ -28,3 +28,5 @@ func InitDB() {
 func GetDB() *gorm.DB {
 	return db
 }
+
+//TODO Add new movie functions
