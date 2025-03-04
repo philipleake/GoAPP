@@ -1,14 +1,9 @@
 package main
 
 import (
-	"log"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 type Movie struct {
@@ -17,24 +12,8 @@ type Movie struct {
 	Director string `json:"director"`
 }
 
-var db *gorm.DB
-
-func initDB() {
-	var err error
-	e := godotenv.Load()
-	if e != nil {
-		log.Fatal("Error loading .env file")
-	}
-	info := "host=localhost user=postgres password=" + os.Getenv("PWD") + " dbname=movies port=5432 sslmode=disable"
-	db, err = gorm.Open(postgres.Open(info), &gorm.Config{})
-	if err != nil {
-		log.Fatal("Failed to connect to the database: ", err)
-	}
-	db.AutoMigrate(&Movie{})
-}
-
 func main() {
-	initDB()
+	InitDB()
 	r := gin.Default()
 
 	r.GET("/movies", getMovies)
@@ -45,7 +24,7 @@ func main() {
 
 func getMovies(c *gin.Context) {
 	var movies []Movie
-	db.Find(&movies)
+	GetDB().Find(&movies)
 	c.JSON(http.StatusOK, movies)
 }
 
@@ -55,6 +34,6 @@ func addMovie(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	db.Create(&movie)
+	GetDB().Create(&movie)
 	c.JSON(http.StatusCreated, movie)
 }
